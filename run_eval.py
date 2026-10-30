@@ -29,6 +29,23 @@ SYSTEM = (
     '(a short, nonempty explanation).'
 )
 
+# General procedure only: no reference labels, task IDs, or worked benchmark answers.
+CHECKLIST = (
+    '\nBefore selecting the final decision, audit all policy layers. In the reason, briefly '
+    'state these four findings for this exact action and resource: '
+    '(1) whether any explicit Deny statement actually matches, '
+    '(2) whether any identity Allow actually matches, '
+    '(3) whether the boundary is absent or contains a matching Allow, and '
+    '(4) whether the SCP is absent or contains a matching Allow. '
+    'Check Action or NotAction, Resource or NotResource, and conditions together for each '
+    'statement; an unrelated Deny is not a matching Deny. '
+    'An Allow in one layer does not override a matching Deny or supply an Allow missing '
+    'from another required layer. ALLOW requires no matching Deny, a matching identity '
+    'Allow, and a matching Allow in every supplied restrictive layer. Otherwise DENY. '
+    'Write the reason key FIRST and the decision key LAST in the JSON object. '
+    'Return only those two keys. Do not stop at finding an identity Allow.'
+)
+
 
 def get_tasks():
     tasks = [json.loads(p.read_text(encoding='utf-8')) for p in sorted((ROOT / 'tasks').glob('*.json'))]
@@ -40,10 +57,13 @@ def get_tasks():
     return tasks
 
 
-def messages_for(task):
+def messages_for(task, strategy='baseline'):
+    if strategy not in ('baseline', 'policy-checklist'):
+        raise ValueError('Unknown prompt strategy: ' + strategy)
     # IDs and scenario descriptions contain answer clues. Keep them private.
     visible = {k: task[k] for k in ('request', 'identity_policies', 'permissions_boundary', 'scp') if k in task}
-    return [{'role': 'system', 'content': SYSTEM},
+    system = SYSTEM if strategy == 'baseline' else SYSTEM + CHECKLIST
+    return [{'role': 'system', 'content': system},
             {'role': 'user', 'content': 'Evaluate this request.\n' + json.dumps(visible, indent=2)}]
 
 
@@ -90,6 +110,8 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--mode', choices=['oracle', 'ollama'], default='oracle')
     ap.add_argument('--model', default='llama3.2:3b')
+    ap.add_argument('--strategy', choices=['baseline', 'policy-checklist'], default='baseline',
+                    help='Optional prompt intervention; baseline preserves the original prompt')
     ap.add_argument('--trials', type=int, default=3)
     ap.add_argument('--timeout', type=int, default=240)
     ap.add_argument('--temperature', type=float, default=0)
@@ -135,7 +157,7 @@ def main(argv=None):
     for task in tasks:
         for trial in range(1, args.trials + 1):
             stamp = time.monotonic()
-            messages = messages_for(task)
+            messages = messages_for(task, args.strategy)
             seed = args.seed + trial - 1
             raw, error, response, payload = '', None, {}, None
             try:
@@ -147,6 +169,7 @@ def main(argv=None):
             result = grade(raw, expected[task['id']])
             record = {
                 'task_id': task['id'], 'trial': trial, 'model': args.model,
+                'strategy': args.strategy,
                 'settings': {'temperature': args.temperature, 'seed': seed, 'num_predict': args.num_predict},
                 'messages': messages, 'request_payload': payload,
                 'raw_response': raw, 'provider_response': response, 'grade': result, 'error': error,
@@ -162,6 +185,7 @@ def main(argv=None):
                 writer.writerows(rows)
     summary = summarize(rows) | {
         'run_id': run_id, 'model': args.model, 'model_metadata': model_info,
+        'strategy': args.strategy,
         'ollama_version': version, 'started_utc': started,
         'finished_utc': datetime.now(timezone.utc).isoformat(),
         'runtime_seconds': round(time.monotonic() - run_start, 3),

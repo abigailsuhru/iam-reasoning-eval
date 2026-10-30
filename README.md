@@ -69,11 +69,45 @@ Defaults: temperature 0, seeds 42/43/44 for three trials, `num_predict=256`, tim
 
 See [the baseline report](results/ANALYSIS.md) for measured scores, runtime, per-task results, and links to genuine transcripts. The run metadata includes the Python/Ollama versions, model digest and quantization, dataset SHA-256, decoding options, timestamps, and platform. Transcripts retain the exact request payload and complete provider response, including token counts, timing, and stop reason when returned.
 
-Only the installed local `llama3.2:3b` model has been tested. This does **not** establish a frontier-model limitation or cross-model spread. The participant confirmed access to local Ollama only. No API or AWS charges are incurred; local electricity and hardware still have costs. Results can vary with model digest, runtime version, hardware, and inference backend.
+The participant also collected 24 fresh-chat trials of `gpt-6.1-sol` at High reasoning in Codex. All 24 pass the same decision grader. Model and reasoning settings were cross-checked against selected local session metadata; no tool calls were observed. See [the comparison report](results/COMPARISON.md).
+
+| Model and interface | Correct | Pass rate | Observed pass^3 |
+|---|---:|---:|---:|
+| Llama 3.2 3B, Ollama, Q4_K_M, temperature 0 | 15/24 | 62.5% | 62.5% |
+| GPT-6.1 Sol, Codex manual chats, High reasoning | 24/24 | 100% | 100% |
+| Llama 3.2 3B, Ollama, optional policy checklist | 21/24 | 87.5% | 87.5% |
+
+The optional checklist is a separate prompt-tuning experiment: it corrected nine original errors but introduced three NotAction errors, and some correct decisions still have false explanations. See [the experiment report](results/PROMPTING_EXPERIMENT.md). The dataset and decision grader are shared, but the baseline comparison interfaces, message roles, and inference settings differ. These are descriptive results, not a controlled causal model comparison. No frontier-model failure was observed on the eight tasks.
+
+Local inference incurred no API or AWS charges; electricity and hardware still have costs. Codex subscription or usage cost attributable to these trials was not measured. Results can vary with model snapshot, runtime version, hardware, and inference backend.
+
+### Verify the manually collected trials
+
+```powershell
+python import_manual.py --verify
+```
+
+The script rechecks all captured prompts, source metadata, raw responses, saved grades, and transcripts without making model calls. It does not rerun inference. The 24 verbatim response files are in `manual_frontier/responses/`. App-exported chat records are in `manual_frontier/chat_exports/collected_threads.json`; selected settings and activity metadata are in `manual_frontier/session_audit.json`. Raw private runtime logs and hidden instructions are not bundled. To reproduce model collection, follow `manual_frontier/README.md` using fresh project-free Codex chats and save new evidence separately. Temperature, seed, token cap, and immutable model snapshot were not exposed and are recorded as unknown.
+
+## Optional prompt improvement experiment
+
+The default `--strategy baseline` preserves the original local prompt. An optional `--strategy policy-checklist` asks the model to report a short finding on matching explicit denies, identity Allows, boundary Allows, and SCP Allows before writing its final decision. The answer still has exactly the same `reason` and `decision` fields, and the existing grader is unchanged. The checklist version asks for the reason first, then the decision. It does not supply reference labels, use the Python oracle to answer, retrain the model, or alter model weights.
+
+```powershell
+python run_eval.py --mode ollama --model llama3.2:3b --strategy policy-checklist --trials 3
+```
+
+On this Windows machine:
+
+```powershell
+.\run.ps1 --mode ollama --model llama3.2:3b --strategy policy-checklist --trials 3
+```
+
+Each run records its strategy along with exact requests and responses in a separate evidence directory. See [the prompting experiment](results/PROMPTING_EXPERIMENT.md). This strategy was designed after reviewing the original failures, so results on these same eight cases are exploratory prompt tuning, not held-out validation. The original results and manual frontier prompts remain intact. Changing the prompt for Llama does not establish how Sol would behave with that new prompt. The unchanged grader scores decisions and JSON format, not the factual correctness or ordering of the requested checklist explanation; inspect the saved reasons before claiming the model's reasoning was fixed.
 
 ## Sources and provenance
 
-Policies are synthetic; no customer data or external benchmark tasks were used. The starter code and eight tasks were supplied from an earlier ChatGPT conversation. During this review, Codex corrected the grader, oracle, prompt isolation, SCP example, and evidence collection; expanded regression checks and reference explanations; ran local model trials; and drafted the analysis and submission notes. The participant must confirm which starter material predates the event and personally review the tasks, references, grader, and analysis before submission. Do not describe AI review as human expert review.
+Policies are synthetic; no customer data or external benchmark tasks were used. The starter code and eight tasks were supplied from an earlier ChatGPT conversation. During this review, Codex corrected the grader, oracle, prompt isolation, SCP example, and evidence collection; expanded regression checks and reference explanations; ran baseline and optional checklist local model trials; imported and audited the participant-collected frontier trials; and drafted the analysis and submission notes. The participant must confirm which starter material predates the event and personally review the tasks, references, grader, and analysis before submission. Do not describe AI review as human expert review.
 
 Official sources checked during this review:
 
@@ -86,6 +120,6 @@ Official sources checked during this review:
 
 The supplied participant guide supports a focused single-turn eval with roughly 5-10 tasks, reference solutions, deterministic grading, repeated trials, saved transcripts, reproducible commands, and disclosed AI assistance. This project supplies those technical pieces.
 
-Outstanding: the guide's checklist asks for at least one frontier model with multiple trials. That comparison has not been performed. The participant must also complete personal expert review, supply accurate prior-work provenance, record a publicly accessible walkthrough of up to five minutes, and check the live HackerRank Instructions tab. Those instructions take precedence over the participant guide; they were not supplied or checked here.
+Frontier-model testing has now been performed through 24 participant-collected Codex chats, but all attempts passed. The remaining scientific limitation is that these basic tasks do not expose a frontier-model weakness. For a stronger submission, design more realistic interacting-policy cases using domain expertise and test them prospectively, preserving this baseline. The participant must still complete personal expert review, supply accurate prior-work provenance, record a publicly accessible walkthrough of up to five minutes, and check the live HackerRank Instructions tab. Those instructions take precedence over the participant guide; they were not supplied or checked here.
 
-See [submission notes](SUBMISSION.md) for a video outline and description grounded in the actual local run. The guide requests a ZIP under 50 MB containing code, README, results, and transcripts, plus a separate video URL and short description. Exclude `.git`, caches, virtual environments, credentials, and model weights. A local-only package should be labeled as such; it is not a completed frontier-model submission.
+See [submission notes](SUBMISSION.md) for a video outline and description grounded in both measured runs. The guide requests a ZIP under 50 MB containing code, README, results, and transcripts, plus a separate video URL and short description. Exclude `.git`, caches, virtual environments, credentials, and model weights. The package includes both runs and clearly states that the tested frontier model solved every baseline task. Do not describe the observed local-model failures as frontier-model failures.

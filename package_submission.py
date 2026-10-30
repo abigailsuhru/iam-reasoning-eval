@@ -3,8 +3,8 @@ from pathlib import Path
 from zipfile import ZipFile, ZIP_DEFLATED
 
 ROOT = Path(__file__).resolve().parent
-FILES = ['README.md', 'SUBMISSION.md', 'requirements.txt', 'run_eval.py', 'run.ps1', 'package_submission.py']
-DIRECTORIES = ['tasks', 'reference', 'graders', 'tests', 'results', 'transcripts']
+FILES = ['README.md', 'SUBMISSION.md', 'requirements.txt', 'run_eval.py', 'run.ps1', 'import_manual.py', 'package_submission.py']
+DIRECTORIES = ['tasks', 'reference', 'graders', 'tests', 'results', 'transcripts', 'manual_frontier']
 
 
 def main():
@@ -14,7 +14,7 @@ def main():
     for name in DIRECTORIES:
         paths.extend(p for p in (ROOT / name).rglob('*')
                      if p.is_file() and '__pycache__' not in p.parts
-                     and p.suffix in {'.py', '.json', '.csv', '.md'})
+                     and p.suffix in {'.py', '.json', '.csv', '.md', '.txt'})
     missing = [str(p) for p in paths if not p.is_file()]
     if missing:
         raise SystemExit('Missing required files: ' + ', '.join(missing))

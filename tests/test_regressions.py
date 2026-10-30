@@ -77,6 +77,24 @@ class RegressionTests(unittest.TestCase):
             self.assertNotIn('scenario', visible)
             self.assertNotIn(task['id'], message)
 
+    def test_checklist_preserves_task_and_keeps_answers_private(self):
+        for task in run_eval.get_tasks():
+            baseline = run_eval.messages_for(task)
+            checklist = run_eval.messages_for(task, 'policy-checklist')
+            self.assertEqual(baseline[1], checklist[1])
+            self.assertEqual(baseline[0]['content'], run_eval.SYSTEM)
+            self.assertTrue(checklist[0]['content'].startswith(run_eval.SYSTEM))
+            self.assertNotIn(task['id'], json.dumps(checklist))
+            self.assertNotIn(task['scenario'], json.dumps(checklist))
+        with self.assertRaises(ValueError):
+            run_eval.messages_for(self.task, 'unknown')
+
+    def test_default_prompts_match_frozen_baseline_evidence(self):
+        for task in run_eval.get_tasks():
+            path = run_eval.ROOT / 'transcripts' / 'llama32-3b-baseline' / f"{task['id']}_trial1.json"
+            recorded = json.loads(path.read_text(encoding='utf-8'))
+            self.assertEqual(run_eval.messages_for(task), recorded['messages'])
+
     def test_metrics_separate_service_errors(self):
         rows = [
             {'task_id': 'a', 'correct': True, 'valid_format': True, 'predicted': 'ALLOW', 'error': None},
