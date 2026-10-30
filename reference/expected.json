@@ -1,0 +1,10 @@
+{
+  "01_basic_allow": "ALLOW",
+  "02_explicit_deny": "DENY",
+  "03_resource_mismatch": "DENY",
+  "04_wildcard_action": "ALLOW",
+  "05_notaction_exception": "ALLOW",
+  "06_boundary_intersection": "DENY",
+  "07_scp_restriction": "DENY",
+  "08_condition_mismatch": "DENY"
+}

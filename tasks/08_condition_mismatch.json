@@ -1,0 +1,30 @@
+{
+  "id": "08_condition_mismatch",
+  "scenario": "Identity allow requires team=platform but the request has team=analytics.",
+  "request": {
+    "action": "s3:GetObject",
+    "resource": "arn:aws:s3:::project-data/report.csv",
+    "context": {
+      "aws:PrincipalTag/team": "analytics"
+    }
+  },
+  "identity_policies": [
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Resource": "arn:aws:s3:::project-data/*",
+          "Action": "s3:GetObject",
+          "Condition": {
+            "StringEquals": {
+              "aws:PrincipalTag/team": "platform"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "permissions_boundary": null,
+  "scp": null
+}

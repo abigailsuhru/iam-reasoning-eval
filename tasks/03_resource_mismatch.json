@@ -1,0 +1,23 @@
+{
+  "id": "03_resource_mismatch",
+  "scenario": "The identity policy grants GetObject in an unrelated bucket.",
+  "request": {
+    "action": "s3:GetObject",
+    "resource": "arn:aws:s3:::project-data/report.csv",
+    "context": {}
+  },
+  "identity_policies": [
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Resource": "arn:aws:s3:::other-bucket/*",
+          "Action": "s3:GetObject"
+        }
+      ]
+    }
+  ],
+  "permissions_boundary": null,
+  "scp": null
+}
