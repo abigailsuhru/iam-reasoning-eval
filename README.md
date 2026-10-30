@@ -1,88 +1,91 @@
 # IAM Reasoning Under Conflicting Policies
 
-A reproducible, **single-turn** evaluation of whether language models can correctly resolve AWS IAM identity policies, optional permissions boundaries, and AWS Organizations service control policies (SCPs) on synthetic S3 access requests.
+A single-turn evaluation of whether a language model can apply conflicting AWS IAM permissions to synthetic S3 access requests. It targets access-denied troubleshooting: a matching identity Allow may still be restricted by an explicit Deny, a permissions boundary, or an Organizations service control policy (SCP).
 
-## Important scope
+This is a bounded reasoning benchmark, not an AWS authorization simulator or a tool for deciding real production access. No AWS account, credentials, or deployment is required.
 
-This is an **explicitly bounded IAM subset**, not a complete AWS IAM simulator, security analyzer, or authorization API. Every task assumes one same-account IAM principal, with no resource-based policies, sessions, RCPs, cross-account access, service-specific rules or other constraints. It covers Action / NotAction, Resource, `*` and `?` wildcards, StringEquals (literal), identity policy union, boundary and SCP intersections, and explicit Deny precedence. The small domain is stated in the model prompt. In particular, no AWS account or deployment is involved.
+## Quick start
 
-## Why it matters
+Python 3.11+ and its standard library are sufficient. No pip packages are required. For inference, install [Ollama](https://ollama.com/download/windows) and download `llama3.2:3b`.
 
-Security and DevOps engineers investigate access denied incidents where one policy appears to grant an action but another rule limits it. Incorrect reasoning can prolong outages or encourage overly broad privileges. The hypothesis is that an LLM may confuse policy union with restrictive boundaries/SCPs, misapply wildcards, or overlook explicit denies.
+```powershell
+python -m unittest discover -s tests -v
+python run_eval.py --mode oracle
+ollama pull llama3.2:3b
+python run_eval.py --mode ollama --model llama3.2:3b --trials 3
+```
 
-## Eight synthetic tasks
+On Windows, if `python` is missing from PATH, this project includes a launcher:
 
-| ID | Topic | Expected |
-|---|---|---|
-| 01 | Basic allow | ALLOW |
-| 02 | Explicit deny precedence | DENY |
-| 03 | Resource ARN mismatch | DENY |
-| 04 | Wildcard action | ALLOW |
-| 05 | NotAction deny exception | ALLOW |
-| 06 | Permissions boundary intersection | DENY |
-| 07 | Restrictive SCP intersection | DENY |
-| 08 | Principal tag StringEquals mismatch | DENY |
+```powershell
+.\run.ps1 -Test
+.\run.ps1 --mode oracle
+.\run.ps1 --mode ollama --model llama3.2:3b --trials 3
+```
 
-All policy documents are synthetic and supplied in `tasks/`. Every scenario includes full request context. `reference/expected.json` provides author-reviewed intended answers. `graders/iam_oracle.py` independently recomputes answers from the provided policies; it is not a live AWS authorization simulator.
+The launcher checks `python`, `py -3`, then the optional Codex bundled Python. Judges can use any normal Python 3.11+ installation; Codex is not a dependency. Ollama must be running and the model installed. Preflight failures stop before creating model evidence. Start Ollama and check `ollama list` if it is unreachable.
 
-## Install and run (Windows PowerShell)
+Each run saves `results/<run-id>/trials.csv`, `results/<run-id>/summary.json`, and `transcripts/<run-id>/*.json`. The default run ID is a UTC timestamp; `--run-id my-run` gives it a name. An existing ID is rejected so earlier results cannot be overwritten. The CSV is checkpointed after every trial. An interrupted run has partial evidence and no completed summary.
 
-1. Install Python 3.11+ from https://www.python.org/downloads/ if not installed. Open PowerShell, `cd` to the extracted project folder.
-2. Validate reference and grader using only Python standard library:
+## Tasks and defensible reference answers
 
-   ```powershell
-   python -m unittest discover -s tests -v
-   python run_eval.py --mode oracle
-   ```
+| ID | Task | Expected | Rule being tested |
+|---|---|---|---|
+| 01 | Matching identity permission | ALLOW | Baseline control |
+| 02 | Conflicting identity policies | DENY | An applicable explicit Deny overrides an Allow |
+| 03 | Permission in a different bucket | DENY | The resource must match |
+| 04 | Wildcard action permission | ALLOW | `s3:Get*` matches GetObject |
+| 05 | Read action excluded from a NotAction Deny | ALLOW | A nonapplicable Deny does not cancel a separate Allow |
+| 06 | Boundary allows only ListBucket | DENY | Identity and boundary permissions intersect |
+| 07 | SCP allows only ListBucket | DENY | Identity and SCP permissions intersect |
+| 08 | Principal tag mismatch | DENY | StringEquals condition must match |
 
-3. Install Ollama from https://ollama.com/download/windows, and reopen PowerShell. Ensure Ollama is running. Download a local model (internet needed once):
+`reference/expected.json` stores decision labels. `reference/solutions.json` contains complete reference answers and explanations that pass the same grader as model outputs. Tests check every reference and reject opposite decisions. These references were reviewed by AI against the policies and official documentation; participant expert review is still required.
 
-   ```powershell
-   ollama pull llama3.2:3b
-   ollama list
-   ```
+The system prompt supplies the rules and the user prompt supplies the request and policies. Task IDs, descriptive scenarios, reference answers, and grading code are withheld. The original scaffold exposed answer-revealing descriptions; the corrected run does not. Tasks were retained from the starter rather than selected after observing failures. These are basic diagnostic cases, not a claim of frontier-level difficulty.
 
-4. Run the model: 
+## Exact scope
 
-   ```powershell
-   python run_eval.py --mode ollama --model llama3.2:3b --trials 3
-   ```
+One same-account IAM user in an Organizations member account. Only identity policies, an optional permissions boundary, and an optional account-level SCP apply. The supplied SCP is the sole policy at that account level and ancestors allow everything. There are no resource-based grants, cross-account access, session policies, RCPs, root/service-linked-role exemptions, or service-specific checks.
 
-   This performs **8 x 3 = 24 model calls**. For a quick smoke test, add `--trials 1`; rerun with 3 for the submission. On CPU, local generation may take a while. No AWS login, paid API, cloud charge, Docker, Python package or API key is required.
+Supported syntax: policy version `2012-10-17`, Action/NotAction, Resource/NotResource, string or list patterns with only `*` and `?`, and StringEquals with single-valued string request context. Action matching and condition-key names are case-insensitive; resource and StringEquals value matching are case-sensitive. Missing condition keys do not match. Identity permissions form a union; boundaries and the supplied SCP restrict that union. Applicable explicit denies take precedence.
 
-5. Examine `results/trials.csv`, `results/summary.json`, and *every* `transcripts/*.json` before reporting findings. Include representative failure transcripts in submission.
+Unsupported statement fields, condition operators, policy variables, multivalued context, and malformed policies are rejected, including in statements that do not match the request. The oracle is deliberately small and not independently validated by the live AWS IAM simulator.
 
-If `python` does not work on Windows, try `py -3` instead. If Ollama is unreachable, start Ollama from the Start menu and verify `ollama list`. If memory is tight, try `ollama pull llama3.2:1b` and pass `--model llama3.2:1b`, but label this as a different model. A model returning invalid JSON fails formatting; errors are recorded, not silently treated as correct.
+## Grading and metrics
 
-## Grading
+Responses must be one JSON object with exactly `decision` (ALLOW or DENY) and a nonempty string `reason`. The deterministic grader checks the whole response, rejects duplicate keys and invalid schemas, and compares the decision. It does not score the explanation. A passing label with a wrong explanation is possible; inspect transcripts before claiming sound reasoning.
 
-Models receive a JSON task and a common system prompt. Their answer must be a JSON object with exactly `decision` (`ALLOW` or `DENY`) and a nonempty string `reason`. A deterministic code grader checks the complete response for valid schema and exact correct decision. It does **not** judge wording of the reason; reasons are retained for human failure analysis. Tests verify acceptance of all eight reference answers and rejection of their opposite decisions, as well as malformed answers and oracle corner cases. A correct output could still be reached by lucky guessing, so read reasons and repeated trials.
+The regression suite covers known-correct and deliberately wrong answers, malformed outputs, IAM wildcard semantics, condition-key case, identity union, restrictive boundaries, NotResource, SCP syntax, unsupported inputs, prompt leakage, provider failures, metric calculations, and preservation of exact messages and previous evidence. Provider fixtures in tests are synthetic and never reported as benchmark evidence.
 
-`pass_rate` is successes / attempts. `pass_power_k` is the fraction of tasks passed on **every** trial (an empirical pass^k). Three trials with temperature=0 test output repeatability but do not guarantee independent samples; vary seeds/temperature if more diversity is needed and record the settings. Each call starts with no previous conversation state.
+- `pass_rate`: correct, correctly formatted responses divided by all attempted trials.
+- `pass_at_k`: fraction of tasks solved at least once in the observed k trials.
+- `pass_power_k`: fraction of tasks solved in every observed trial (empirical pass^k).
+- `infrastructure_errors`, `format_failures`, `decision_failures`: separate counts. A connection error is not evidence of an IAM reasoning limitation.
 
-## Reproducibility / budget
+Defaults: temperature 0, seeds 42/43/44 for three trials, `num_predict=256`, timeout 240 seconds, Ollama JSON output mode. Options: `--temperature`, `--seed`, `--num-predict`, `--timeout`. Every trial starts with a new two-message conversation. Zero-temperature trials are correlated and can repeat identical outputs; these metrics describe observed repeatability, not independent statistical estimates. Provider prompt caching does not add previous conversation messages.
 
-Python 3.11+ (standard library), local Ollama, `llama3.2:3b` (downloaded separately); temperature 0, `num_predict` 180, 240-second request timeout. Timestamp, model, per-trial latency and optional input/output token counts are stored. Model files are not included in ZIP. Run cost: **$0 in API/cloud charges**; hardware and power consumed locally. CPU runtime depends on PC.
+## Measured results
 
-## Results and limitations (fill out after running)
+See [the baseline report](results/ANALYSIS.md) for measured scores, runtime, per-task results, and links to genuine transcripts. The run metadata includes the Python/Ollama versions, model digest and quantization, dataset SHA-256, decoding options, timestamps, and platform. Transcripts retain the exact request payload and complete provider response, including token counts, timing, and stop reason when returned.
 
-**Not yet benchmarked unless `results/summary.json` exists.** Do not report invented model failures. Record measured pass rate, pass^3, version (`ollama --version`, model tag and optionally `ollama show llama3.2:3b`), total runtime, and one real failure explanation based on its transcript. If all eight tasks are solved perfectly, honestly report that the current benchmark did not demonstrate a limitation; add independently expert-reviewed cases instead of claiming a failure.
+Only the installed local `llama3.2:3b` model has been tested. This does **not** establish a frontier-model limitation or cross-model spread. The participant confirmed access to local Ollama only. No API or AWS charges are incurred; local electricity and hardware still have costs. Results can vary with model digest, runtime version, hardware, and inference backend.
 
-The hackathon guide recommends testing at least one frontier model with several trials. A local small model alone may meet a participation goal but cannot demonstrate frontier model limitations. If accessible without payment, use the **same tasks, grading and settings disclosure** to evaluate a frontier model, save complete prompts and transcripts, and avoid claiming equivalence between local and frontier performance.
+## Sources and provenance
 
-## Source and provenance
+Policies are synthetic; no customer data or external benchmark tasks were used. The starter code and eight tasks were supplied from an earlier ChatGPT conversation. During this review, Codex corrected the grader, oracle, prompt isolation, SCP example, and evidence collection; expanded regression checks and reference explanations; ran local model trials; and drafted the analysis and submission notes. The participant must confirm which starter material predates the event and personally review the tasks, references, grader, and analysis before submission. Do not describe AI review as human expert review.
 
-Policy rules informed by AWS official documentation:
-- https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html
-- https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic_policy-eval-denyallow.html
-- https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html
+Official sources checked during this review:
 
-Synthetic policy inputs, Python oracle, grade rules and harness created for this hackathon. No confidential data. Record the actual development date and all AI assistance honestly. **Author must manually review each task and oracle outcome before submission** and disclose that AI helped generate scaffold/policies/code if applicable.
+- [AWS policy evaluation logic](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html): explicit denies and policy intersections.
+- [AWS resource elements](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_resource.html): `*` and `?` wildcards.
+- [AWS condition elements](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_condition.html): condition-key names versus value case.
+- [SCP syntax](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps_syntax.html): Allow statements require Resource `*`. Task 07 was corrected accordingly, without changing its expected denial.
 
-## Submission
+## Hackathon status and packaging
 
-The participant guide describes one ZIP (max 50 MB) with code and README, one publicly accessible walkthrough video link (up to 5 minutes), and a short description. The kickoff **Instructions tab takes precedence** if its required files or format differ. Do not include model weights, credentials, or videos inside ZIP. ZIP the project *after* model evaluation so it contains saved results and transcripts.
+The supplied participant guide supports a focused single-turn eval with roughly 5-10 tasks, reference solutions, deterministic grading, repeated trials, saved transcripts, reproducible commands, and disclosed AI assistance. This project supplies those technical pieces.
 
-Video outline: 1 min real IAM incident type and hypothesis; 1.5 min two tasks plus grader/unit tests; 2 min real model failure examples and results; 0.5 min takeaway.
+Outstanding: the guide's checklist asks for at least one frontier model with multiple trials. That comparison has not been performed. The participant must also complete personal expert review, supply accurate prior-work provenance, record a publicly accessible walkthrough of up to five minutes, and check the live HackerRank Instructions tab. Those instructions take precedence over the participant guide; they were not supplied or checked here.
 
-Potential short description (edit after real tests): "This evaluation tests reasoning about conflicting AWS IAM identity policies, permissions boundaries, and Organizations SCPs on eight reproducible synthetic S3 authorization cases. A Python oracle and deterministic grader test whether the model correctly predicts ALLOW or DENY, while recorded model explanations reveal its reasoning mistakes. [Insert measured model name, pass rate and confirmed failure pattern after evaluating.]"
+See [submission notes](SUBMISSION.md) for a video outline and description grounded in the actual local run. The guide requests a ZIP under 50 MB containing code, README, results, and transcripts, plus a separate video URL and short description. Exclude `.git`, caches, virtual environments, credentials, and model weights. A local-only package should be labeled as such; it is not a completed frontier-model submission.

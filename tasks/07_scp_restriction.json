@@ -24,7 +24,7 @@
     "Statement": [
       {
         "Effect": "Allow",
-        "Resource": "arn:aws:s3:::project-data",
+        "Resource": "*",
         "Action": "s3:ListBucket"
       }
     ]

@@ -1,11 +1,12 @@
-"""Run the single-turn eval against local Ollama, or validate the oracle offline."""
+"""Run independent single-turn Ollama trials and preserve their evidence."""
 import argparse
 import csv
+import hashlib
 import json
 import platform
+import re
 import time
 import urllib.request
-import urllib.error
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -13,81 +14,169 @@ from graders.grade import grade
 from graders.iam_oracle import evaluate
 
 ROOT = Path(__file__).resolve().parent
-SYSTEM = ("You are auditing access authorization for a deliberately scoped AWS IAM scenario. "
-"Only identity-based policies, an optional permissions boundary, and an optional SCP apply. "
-"No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. "
-"Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, "
-"and if a permissions boundary or SCP is provided each must also Allow. "
-"Match Action case-insensitively, Resource case-sensitively, wildcard * and ?, and conditions "
-"StringEquals exactly. A missing condition key does not match. "
-"Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short explanation).")
+SYSTEM = (
+    'You are auditing access authorization for a deliberately scoped AWS IAM scenario. '
+    'Only identity-based policies, an optional permissions boundary, and an optional SCP apply. '
+    'The principal is a same-account IAM user in an Organizations member account. '
+    'The supplied SCP is the sole policy at the account level; ancestors allow all actions. '
+    'No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. '
+    'Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, '
+    'and if a permissions boundary or SCP is provided each must also Allow. '
+    'Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. '
+    'StringEquals matches values literally and case-sensitively; context key names are '
+    'case-insensitive. Context values are single strings. A missing condition key does not match. '
+    'Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason '
+    '(a short, nonempty explanation).'
+)
+
 
 def get_tasks():
-    return [json.loads(p.read_text(encoding='utf-8')) for p in sorted((ROOT/'tasks').glob('*.json'))]
+    tasks = [json.loads(p.read_text(encoding='utf-8')) for p in sorted((ROOT / 'tasks').glob('*.json'))]
+    if not tasks:
+        raise ValueError('No tasks found')
+    ids = [t['id'] for t in tasks]
+    if len(set(ids)) != len(ids) or any(not re.fullmatch(r'[A-Za-z0-9_-]+', i) for i in ids):
+        raise ValueError('Task IDs must be unique and filename-safe')
+    return tasks
 
-def query_ollama(model, system, task, timeout):
-    payload = json.dumps({'model':model,'stream':False,'format':'json',
-        'options':{'temperature':0, 'num_predict':180},
-        'messages':[{'role':'system','content':system},
-                    {'role':'user','content':'Evaluate this request.\n'+json.dumps(task, indent=2)}]}).encode()
-    req = urllib.request.Request('http://localhost:11434/api/chat', payload,
-        {'Content-Type':'application/json'}, method='POST')
+
+def messages_for(task):
+    # IDs and scenario descriptions contain answer clues. Keep them private.
+    visible = {k: task[k] for k in ('request', 'identity_policies', 'permissions_boundary', 'scp') if k in task}
+    return [{'role': 'system', 'content': SYSTEM},
+            {'role': 'user', 'content': 'Evaluate this request.\n' + json.dumps(visible, indent=2)}]
+
+
+def request_json(url, timeout, payload=None):
+    encoded = None if payload is None else json.dumps(payload).encode('utf-8')
+    req = urllib.request.Request(url, encoded, {'Content-Type': 'application/json'})
     with urllib.request.urlopen(req, timeout=timeout) as resp:
-        data = json.load(resp)
-    return data['message']['content'], data.get('eval_count'), data.get('prompt_eval_count')
+        return json.load(resp)
 
-def main():
-    ap=argparse.ArgumentParser()
-    ap.add_argument('--mode', choices=['oracle','ollama'], default='oracle')
+
+def query_ollama(model, messages, timeout, temperature=0, seed=0, num_predict=256):
+    payload = {'model': model, 'stream': False, 'format': 'json',
+               'options': {'temperature': temperature, 'seed': seed, 'num_predict': num_predict},
+               'messages': messages}
+    response = request_json('http://localhost:11434/api/chat', timeout, payload)
+    if not isinstance(response.get('message', {}).get('content'), str):
+        raise ValueError('Ollama response has no string message.content')
+    if response.get('done') is not True:
+        raise ValueError('Ollama returned an incomplete response')
+    return payload, response
+
+
+def summarize(rows):
+    groups = defaultdict(list)
+    for row in rows:
+        groups[row['task_id']].append(row)
+    responses = [r for r in rows if r['error'] is None]
+    return {
+        'total_trials': len(rows), 'total_passes': sum(r['correct'] for r in rows),
+        'pass_rate': sum(r['correct'] for r in rows) / len(rows),
+        'pass_power_k': sum(all(r['correct'] for r in rs) for rs in groups.values()) / len(groups),
+        'pass_at_k': sum(any(r['correct'] for r in rs) for rs in groups.values()) / len(groups),
+        'infrastructure_errors': len(rows) - len(responses),
+        'format_failures': sum(not r['valid_format'] for r in responses),
+        'decision_failures': sum(r['valid_format'] and not r['correct'] for r in responses),
+        'per_task': {name: {'passes': sum(r['correct'] for r in rs), 'trials': len(rs),
+                            'predictions': [r['predicted'] for r in rs],
+                            'errors': sum(r['error'] is not None for r in rs)}
+                     for name, rs in groups.items()},
+    }
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument('--mode', choices=['oracle', 'ollama'], default='oracle')
     ap.add_argument('--model', default='llama3.2:3b')
     ap.add_argument('--trials', type=int, default=3)
     ap.add_argument('--timeout', type=int, default=240)
-    args=ap.parse_args()
-    if args.trials < 1: ap.error('trials must be positive')
-    tasks=get_tasks()
-    expected=json.loads((ROOT/'reference'/'expected.json').read_text(encoding='utf-8'))
-    for t in tasks:
-        actual=evaluate(t)
-        if actual != expected[t['id']]:
-            raise AssertionError(f"Reference mismatch in {t['id']}: {actual} != {expected[t['id']]}")
-    print(f'Oracle validation passed: {len(tasks)} reference solutions.')
-    if args.mode=='oracle': return
-    out=ROOT/'results'; out.mkdir(exist_ok=True)
-    trans=ROOT/'transcripts';trans.mkdir(exist_ok=True)
-    rows=[]
-    start=datetime.now(timezone.utc).isoformat()
-    for t in tasks:
-        for trial in range(1,args.trials+1):
-            stamp=time.monotonic()
-            raw=''; error=None; tokens=None; prompt_tokens=None
+    ap.add_argument('--temperature', type=float, default=0)
+    ap.add_argument('--seed', type=int, default=42, help='Base seed; increments on each trial')
+    ap.add_argument('--num-predict', type=int, default=256)
+    ap.add_argument('--run-id', help='Unique evidence directory name (defaults to UTC timestamp)')
+    args = ap.parse_args(argv)
+    if args.trials < 1 or args.timeout < 1 or args.num_predict < 1:
+        ap.error('trials, timeout, and num-predict must be positive')
+    if not 0 <= args.temperature <= 2:
+        ap.error('temperature must be between 0 and 2')
+    tasks = get_tasks()
+    expected = json.loads((ROOT / 'reference' / 'expected.json').read_text(encoding='utf-8'))
+    if set(expected) != {t['id'] for t in tasks}:
+        raise ValueError('Reference IDs must match task IDs exactly')
+    for task in tasks:
+        if evaluate(task) != expected[task['id']]:
+            raise ValueError('Reference mismatch in ' + task['id'])
+    print(f'Oracle validation passed: {len(tasks)} reference solutions.', flush=True)
+    if args.mode == 'oracle':
+        return 0
+    run_id = args.run_id or datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
+    if not re.fullmatch(r'[A-Za-z0-9_-]+', run_id):
+        ap.error('run-id must contain only letters, numbers, underscores, and hyphens')
+    out, trans = ROOT / 'results' / run_id, ROOT / 'transcripts' / run_id
+    if out.exists() or trans.exists():
+        ap.error('run-id already exists; choose a new ID to preserve existing evidence')
+    try:
+        version = request_json('http://localhost:11434/api/version', args.timeout)
+        models = request_json('http://localhost:11434/api/tags', args.timeout)['models']
+        model_name = args.model if ':' in args.model else args.model + ':latest'
+        model_info = next((m for m in models if m['name'] == model_name), None)
+        if model_info is None:
+            ap.error(f'Model is not installed. Run: ollama pull {args.model}')
+    except (OSError, ValueError, KeyError) as exc:
+        ap.error(f'Ollama preflight failed: {exc}. Start Ollama and check ollama list.')
+    out.mkdir(parents=True)
+    trans.mkdir(parents=True)
+    started = datetime.now(timezone.utc).isoformat()
+    run_start = time.monotonic()
+    dataset_hash = hashlib.sha256(json.dumps(tasks, sort_keys=True).encode()).hexdigest()
+    rows = []
+    for task in tasks:
+        for trial in range(1, args.trials + 1):
+            stamp = time.monotonic()
+            messages = messages_for(task)
+            seed = args.seed + trial - 1
+            raw, error, response, payload = '', None, {}, None
             try:
-                raw,tokens,prompt_tokens=query_ollama(args.model,SYSTEM,t,args.timeout)
-                result=grade(raw,expected[t['id']])
-            except (urllib.error.URLError, TimeoutError, ValueError, KeyError) as exc:
-                error=f'{type(exc).__name__}: {exc}'
-                result=grade(raw,expected[t['id']])
-            record={'task_id':t['id'],'trial':trial,'model':args.model,
-              'temperature':0,'prompt':{'system':SYSTEM,'user':t},
-              'raw_response':raw,'grade':result,'error':error,
-              'elapsed_seconds':round(time.monotonic()-stamp,2),
-              'output_tokens':tokens,'input_tokens':prompt_tokens,
-              'utc_time':datetime.now(timezone.utc).isoformat()}
-            (trans/f"{t['id']}_trial{trial}.json").write_text(json.dumps(record,indent=2)+'\n',encoding='utf-8')
-            rows.append({k:record[k] for k in ('task_id','trial','model','elapsed_seconds','error')}|
-                        {k:result[k] for k in ('valid_format','correct','predicted','expected')})
-            print(t['id'],trial,'PASS' if result['correct'] else 'FAIL',error or '')
-    with (out/'trials.csv').open('w',newline='',encoding='utf-8') as f:
-        writer=csv.DictWriter(f,fieldnames=rows[0].keys());writer.writeheader();writer.writerows(rows)
-    groups=defaultdict(list)
-    for row in rows:groups[row['task_id']].append(row['correct'])
-    all_pass=sum(r['correct'] for r in rows)
-    summary={'model':args.model,'started_utc':start,'trials_per_task':args.trials,
-      'tasks':len(tasks),'total_trials':len(rows),'total_passes':all_pass,
-      'pass_rate':all_pass/len(rows),'pass_power_k':sum(all(x) for x in groups.values())/len(groups),
-      'per_task':{name:{'passes':sum(values),'trials':len(values)} for name,values in groups.items()},
-      'environment':platform.platform(),'api_cost_usd':0,
-      'note':'Local inference has no API charge; electricity and hardware resources are not free.'}
-    (out/'summary.json').write_text(json.dumps(summary,indent=2)+'\n',encoding='utf-8')
-    print('Summary:',json.dumps(summary,indent=2))
-    print('Saved results/trials.csv, results/summary.json and transcripts/*.json')
-if __name__=='__main__':main()
+                payload, response = query_ollama(args.model, messages, args.timeout,
+                                                 args.temperature, seed, args.num_predict)
+                raw = response['message']['content']
+            except (OSError, ValueError, KeyError, TypeError) as exc:
+                error = f'{type(exc).__name__}: {exc}'
+            result = grade(raw, expected[task['id']])
+            record = {
+                'task_id': task['id'], 'trial': trial, 'model': args.model,
+                'settings': {'temperature': args.temperature, 'seed': seed, 'num_predict': args.num_predict},
+                'messages': messages, 'request_payload': payload,
+                'raw_response': raw, 'provider_response': response, 'grade': result, 'error': error,
+                'elapsed_seconds': round(time.monotonic() - stamp, 3),
+                'utc_time': datetime.now(timezone.utc).isoformat(), 'dataset_sha256': dataset_hash,
+            }
+            (trans / f"{task['id']}_trial{trial}.json").write_text(json.dumps(record, indent=2) + '\n', encoding='utf-8')
+            rows.append({k: record[k] for k in ('task_id', 'trial', 'model', 'elapsed_seconds', 'error')} | result)
+            print(task['id'], trial, 'ERROR' if error else ('PASS' if result['correct'] else 'FAIL'), error or '', flush=True)
+            with (out / 'trials.csv').open('w', newline='', encoding='utf-8') as stream:
+                writer = csv.DictWriter(stream, fieldnames=rows[0].keys())
+                writer.writeheader()
+                writer.writerows(rows)
+    summary = summarize(rows) | {
+        'run_id': run_id, 'model': args.model, 'model_metadata': model_info,
+        'ollama_version': version, 'started_utc': started,
+        'finished_utc': datetime.now(timezone.utc).isoformat(),
+        'runtime_seconds': round(time.monotonic() - run_start, 3),
+        'trials_per_task': args.trials, 'tasks': len(tasks),
+        'settings': {'temperature': args.temperature, 'base_seed': args.seed, 'num_predict': args.num_predict,
+                     'timeout_seconds': args.timeout},
+        'dataset_sha256': dataset_hash, 'python_version': platform.python_version(),
+        'environment': platform.platform(), 'api_cost_usd': 0,
+        'note': 'Local inference has no API charge. Infrastructure errors are not evidence of model reasoning failure.',
+    }
+    (out / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n', encoding='utf-8')
+    print('Summary:', json.dumps(summary, indent=2), flush=True)
+    print(f'Saved {out} and {trans}', flush=True)
+    return 1 if summary['infrastructure_errors'] else 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

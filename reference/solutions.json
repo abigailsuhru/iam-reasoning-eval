@@ -1,0 +1,10 @@
+{
+  "01_basic_allow": {"decision": "ALLOW", "reason": "The identity Allow matches both s3:GetObject and project-data/report.csv; no restriction applies."},
+  "02_explicit_deny": {"decision": "DENY", "reason": "A second identity policy explicitly denies GetObject on this exact object; it overrides the matching Allow."},
+  "03_resource_mismatch": {"decision": "DENY", "reason": "The sole Allow covers other-bucket, not the requested project-data object. No identity Allow matches."},
+  "04_wildcard_action": {"decision": "ALLOW", "reason": "s3:Get* matches s3:GetObject, and project-data/* matches the requested object."},
+  "05_notaction_exception": {"decision": "ALLOW", "reason": "The NotAction Deny excludes GetObject, so it does not apply. A separate identity Allow grants the request."},
+  "06_boundary_intersection": {"decision": "DENY", "reason": "The identity Allow matches, but the boundary permits only ListBucket on the bucket. It has no matching GetObject Allow."},
+  "07_scp_restriction": {"decision": "DENY", "reason": "The identity Allow matches, but the sole account-level SCP allows only ListBucket. GetObject is outside the SCP allow list."},
+  "08_condition_mismatch": {"decision": "DENY", "reason": "The only identity Allow requires team=platform. The request has team=analytics, so the condition fails and no Allow applies."}
+}

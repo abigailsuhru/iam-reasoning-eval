@@ -8,12 +8,15 @@ ROOT=Path(__file__).resolve().parents[1]
 class EvalTests(unittest.TestCase):
     def test_reference_answers(self):
         expected=json.loads((ROOT/'reference/expected.json').read_text())
+        solutions=json.loads((ROOT/'reference/solutions.json').read_text())
+        self.assertEqual(set(solutions), set(expected))
         tasks=list((ROOT/'tasks').glob('*.json'))
         self.assertEqual(len(tasks),8)
         for path in tasks:
             task=json.loads(path.read_text())
             with self.subTest(task=task['id']):
                 self.assertEqual(evaluate(task),expected[task['id']])
+                self.assertTrue(grade(json.dumps(solutions[task['id']]), expected[task['id']])['correct'])
                 self.assertTrue(grade(json.dumps({'decision':expected[task['id']], 'reason':'Validated rule'}), expected[task['id']])['correct'])
                 wrong='DENY' if expected[task['id']]=='ALLOW' else 'ALLOW'
                 self.assertFalse(grade(json.dumps({'decision':wrong, 'reason':'Incorrect rule'}),expected[task['id']])['correct'])

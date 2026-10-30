@@ -1,0 +1,68 @@
+{
+  "task_id": "08_condition_mismatch",
+  "trial": 1,
+  "model": "llama3.2:3b",
+  "settings": {
+    "temperature": 0,
+    "seed": 42,
+    "num_predict": 256
+  },
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+    },
+    {
+      "role": "user",
+      "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {\n      \"aws:PrincipalTag/team\": \"analytics\"\n    }\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\",\n          \"Condition\": {\n            \"StringEquals\": {\n              \"aws:PrincipalTag/team\": \"platform\"\n            }\n          }\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}"
+    }
+  ],
+  "request_payload": {
+    "model": "llama3.2:3b",
+    "stream": false,
+    "format": "json",
+    "options": {
+      "temperature": 0,
+      "seed": 42,
+      "num_predict": 256
+    },
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+      },
+      {
+        "role": "user",
+        "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {\n      \"aws:PrincipalTag/team\": \"analytics\"\n    }\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\",\n          \"Condition\": {\n            \"StringEquals\": {\n              \"aws:PrincipalTag/team\": \"platform\"\n            }\n          }\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}"
+      }
+    ]
+  },
+  "raw_response": "{\n  \"decision\": \"DENY\",\n  \"reason\": \"The identity-based policy does not Allow the action, and the SCP and permissions boundary are not provided.\"\n}",
+  "provider_response": {
+    "model": "llama3.2:3b",
+    "created_at": "2026-10-30T19:21:51.6010881Z",
+    "message": {
+      "role": "assistant",
+      "content": "{\n  \"decision\": \"DENY\",\n  \"reason\": \"The identity-based policy does not Allow the action, and the SCP and permissions boundary are not provided.\"\n}"
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 12762550500,
+    "load_duration": 14176400,
+    "prompt_eval_count": 384,
+    "prompt_eval_cached_count": 255,
+    "prompt_eval_duration": 6727614000,
+    "eval_count": 36,
+    "eval_duration": 5994285000
+  },
+  "grade": {
+    "valid_format": true,
+    "correct": true,
+    "predicted": "DENY",
+    "expected": "DENY"
+  },
+  "error": null,
+  "elapsed_seconds": 14.797,
+  "utc_time": "2026-10-30T19:21:51.602638+00:00",
+  "dataset_sha256": "ab3e03e4df6cbca20c29680ed8584f38cb6b4a041c3e286d2c991c023ed81e71"
+}
