@@ -1,0 +1,1 @@
+{"decision":"DENY","reason":"The identity policy allows the request, but the permissions boundary does not allow s3:GetObject on the requested object."}

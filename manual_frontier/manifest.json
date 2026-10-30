@@ -1,0 +1,392 @@
+{
+  "protocol": "manual-codex-v1",
+  "status": "24 participant-collected Codex trials imported and graded; see results/gpt61-sol-high-manual/summary.json",
+  "warning": "System and user text are combined into one user message; this is a different interface from Ollama.",
+  "extra_instruction": "Do not use tools or access files, websites, or other chats. Solve only from the text below.",
+  "trials": [
+    {
+      "prompt_file": "prompts/prompt01_trial1.txt",
+      "task_id": "01_basic_allow",
+      "trial": 1,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {}\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\"\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}"
+        }
+      ],
+      "prompt_sha256": "637f1316087e105b5a84d704dd98365eac2745b51da3356ad2859f9e3713cf30"
+    },
+    {
+      "prompt_file": "prompts/prompt01_trial2.txt",
+      "task_id": "01_basic_allow",
+      "trial": 2,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {}\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\"\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}"
+        }
+      ],
+      "prompt_sha256": "637f1316087e105b5a84d704dd98365eac2745b51da3356ad2859f9e3713cf30"
+    },
+    {
+      "prompt_file": "prompts/prompt01_trial3.txt",
+      "task_id": "01_basic_allow",
+      "trial": 3,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {}\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\"\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}"
+        }
+      ],
+      "prompt_sha256": "637f1316087e105b5a84d704dd98365eac2745b51da3356ad2859f9e3713cf30"
+    },
+    {
+      "prompt_file": "prompts/prompt02_trial1.txt",
+      "task_id": "02_explicit_deny",
+      "trial": 1,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {}\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\"\n        }\n      ]\n    },\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Deny\",\n          \"Resource\": \"arn:aws:s3:::project-data/report.csv\",\n          \"Action\": \"s3:GetObject\"\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}"
+        }
+      ],
+      "prompt_sha256": "1bfff86b4d6b0348ae71a7dc7dd686389b6872e2ab784e8c7623603c5ca951d9"
+    },
+    {
+      "prompt_file": "prompts/prompt02_trial2.txt",
+      "task_id": "02_explicit_deny",
+      "trial": 2,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {}\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\"\n        }\n      ]\n    },\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Deny\",\n          \"Resource\": \"arn:aws:s3:::project-data/report.csv\",\n          \"Action\": \"s3:GetObject\"\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}"
+        }
+      ],
+      "prompt_sha256": "1bfff86b4d6b0348ae71a7dc7dd686389b6872e2ab784e8c7623603c5ca951d9"
+    },
+    {
+      "prompt_file": "prompts/prompt02_trial3.txt",
+      "task_id": "02_explicit_deny",
+      "trial": 3,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {}\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\"\n        }\n      ]\n    },\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Deny\",\n          \"Resource\": \"arn:aws:s3:::project-data/report.csv\",\n          \"Action\": \"s3:GetObject\"\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}"
+        }
+      ],
+      "prompt_sha256": "1bfff86b4d6b0348ae71a7dc7dd686389b6872e2ab784e8c7623603c5ca951d9"
+    },
+    {
+      "prompt_file": "prompts/prompt03_trial1.txt",
+      "task_id": "03_resource_mismatch",
+      "trial": 1,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {}\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::other-bucket/*\",\n          \"Action\": \"s3:GetObject\"\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}"
+        }
+      ],
+      "prompt_sha256": "d3876ebffabaf29f26871d3fcc6d19f55bfb54492a27dfa2964599e223833c06"
+    },
+    {
+      "prompt_file": "prompts/prompt03_trial2.txt",
+      "task_id": "03_resource_mismatch",
+      "trial": 2,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {}\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::other-bucket/*\",\n          \"Action\": \"s3:GetObject\"\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}"
+        }
+      ],
+      "prompt_sha256": "d3876ebffabaf29f26871d3fcc6d19f55bfb54492a27dfa2964599e223833c06"
+    },
+    {
+      "prompt_file": "prompts/prompt03_trial3.txt",
+      "task_id": "03_resource_mismatch",
+      "trial": 3,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {}\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::other-bucket/*\",\n          \"Action\": \"s3:GetObject\"\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}"
+        }
+      ],
+      "prompt_sha256": "d3876ebffabaf29f26871d3fcc6d19f55bfb54492a27dfa2964599e223833c06"
+    },
+    {
+      "prompt_file": "prompts/prompt04_trial1.txt",
+      "task_id": "04_wildcard_action",
+      "trial": 1,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {}\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:Get*\"\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}"
+        }
+      ],
+      "prompt_sha256": "32044dc2914444039fcb9dcf1b7bfc618ae967be03294abdce6a3fb6de7288d0"
+    },
+    {
+      "prompt_file": "prompts/prompt04_trial2.txt",
+      "task_id": "04_wildcard_action",
+      "trial": 2,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {}\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:Get*\"\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}"
+        }
+      ],
+      "prompt_sha256": "32044dc2914444039fcb9dcf1b7bfc618ae967be03294abdce6a3fb6de7288d0"
+    },
+    {
+      "prompt_file": "prompts/prompt04_trial3.txt",
+      "task_id": "04_wildcard_action",
+      "trial": 3,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {}\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:Get*\"\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}"
+        }
+      ],
+      "prompt_sha256": "32044dc2914444039fcb9dcf1b7bfc618ae967be03294abdce6a3fb6de7288d0"
+    },
+    {
+      "prompt_file": "prompts/prompt05_trial1.txt",
+      "task_id": "05_notaction_exception",
+      "trial": 1,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {}\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\"\n        }\n      ]\n    },\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Deny\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"NotAction\": \"s3:GetObject\"\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}"
+        }
+      ],
+      "prompt_sha256": "6c35dc0c047410565940a9e933593715a04d094851630c9b481326fbdcd06ba2"
+    },
+    {
+      "prompt_file": "prompts/prompt05_trial2.txt",
+      "task_id": "05_notaction_exception",
+      "trial": 2,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {}\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\"\n        }\n      ]\n    },\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Deny\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"NotAction\": \"s3:GetObject\"\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}"
+        }
+      ],
+      "prompt_sha256": "6c35dc0c047410565940a9e933593715a04d094851630c9b481326fbdcd06ba2"
+    },
+    {
+      "prompt_file": "prompts/prompt05_trial3.txt",
+      "task_id": "05_notaction_exception",
+      "trial": 3,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {}\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\"\n        }\n      ]\n    },\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Deny\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"NotAction\": \"s3:GetObject\"\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}"
+        }
+      ],
+      "prompt_sha256": "6c35dc0c047410565940a9e933593715a04d094851630c9b481326fbdcd06ba2"
+    },
+    {
+      "prompt_file": "prompts/prompt06_trial1.txt",
+      "task_id": "06_boundary_intersection",
+      "trial": 1,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {}\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\"\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": {\n    \"Version\": \"2012-10-17\",\n    \"Statement\": [\n      {\n        \"Effect\": \"Allow\",\n        \"Resource\": \"arn:aws:s3:::project-data\",\n        \"Action\": \"s3:ListBucket\"\n      }\n    ]\n  },\n  \"scp\": null\n}"
+        }
+      ],
+      "prompt_sha256": "f5ff023a83c7b14e3d517106cca065f4d1b6f734ad1bb9666c7b1dd273242790"
+    },
+    {
+      "prompt_file": "prompts/prompt06_trial2.txt",
+      "task_id": "06_boundary_intersection",
+      "trial": 2,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {}\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\"\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": {\n    \"Version\": \"2012-10-17\",\n    \"Statement\": [\n      {\n        \"Effect\": \"Allow\",\n        \"Resource\": \"arn:aws:s3:::project-data\",\n        \"Action\": \"s3:ListBucket\"\n      }\n    ]\n  },\n  \"scp\": null\n}"
+        }
+      ],
+      "prompt_sha256": "f5ff023a83c7b14e3d517106cca065f4d1b6f734ad1bb9666c7b1dd273242790"
+    },
+    {
+      "prompt_file": "prompts/prompt06_trial3.txt",
+      "task_id": "06_boundary_intersection",
+      "trial": 3,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {}\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\"\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": {\n    \"Version\": \"2012-10-17\",\n    \"Statement\": [\n      {\n        \"Effect\": \"Allow\",\n        \"Resource\": \"arn:aws:s3:::project-data\",\n        \"Action\": \"s3:ListBucket\"\n      }\n    ]\n  },\n  \"scp\": null\n}"
+        }
+      ],
+      "prompt_sha256": "f5ff023a83c7b14e3d517106cca065f4d1b6f734ad1bb9666c7b1dd273242790"
+    },
+    {
+      "prompt_file": "prompts/prompt07_trial1.txt",
+      "task_id": "07_scp_restriction",
+      "trial": 1,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {}\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\"\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": {\n    \"Version\": \"2012-10-17\",\n    \"Statement\": [\n      {\n        \"Effect\": \"Allow\",\n        \"Resource\": \"*\",\n        \"Action\": \"s3:ListBucket\"\n      }\n    ]\n  }\n}"
+        }
+      ],
+      "prompt_sha256": "771d9ec5f7a10aed6dd13beebb3808fc07b0e7b92cfb9bc4655fa7c4a36b0ab4"
+    },
+    {
+      "prompt_file": "prompts/prompt07_trial2.txt",
+      "task_id": "07_scp_restriction",
+      "trial": 2,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {}\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\"\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": {\n    \"Version\": \"2012-10-17\",\n    \"Statement\": [\n      {\n        \"Effect\": \"Allow\",\n        \"Resource\": \"*\",\n        \"Action\": \"s3:ListBucket\"\n      }\n    ]\n  }\n}"
+        }
+      ],
+      "prompt_sha256": "771d9ec5f7a10aed6dd13beebb3808fc07b0e7b92cfb9bc4655fa7c4a36b0ab4"
+    },
+    {
+      "prompt_file": "prompts/prompt07_trial3.txt",
+      "task_id": "07_scp_restriction",
+      "trial": 3,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {}\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\"\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": {\n    \"Version\": \"2012-10-17\",\n    \"Statement\": [\n      {\n        \"Effect\": \"Allow\",\n        \"Resource\": \"*\",\n        \"Action\": \"s3:ListBucket\"\n      }\n    ]\n  }\n}"
+        }
+      ],
+      "prompt_sha256": "771d9ec5f7a10aed6dd13beebb3808fc07b0e7b92cfb9bc4655fa7c4a36b0ab4"
+    },
+    {
+      "prompt_file": "prompts/prompt08_trial1.txt",
+      "task_id": "08_condition_mismatch",
+      "trial": 1,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {\n      \"aws:PrincipalTag/team\": \"analytics\"\n    }\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\",\n          \"Condition\": {\n            \"StringEquals\": {\n              \"aws:PrincipalTag/team\": \"platform\"\n            }\n          }\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}"
+        }
+      ],
+      "prompt_sha256": "86eff0601c0b5f1062f133b1f993c4d5ca39aa2633acc56306afe9a972a9fc65"
+    },
+    {
+      "prompt_file": "prompts/prompt08_trial2.txt",
+      "task_id": "08_condition_mismatch",
+      "trial": 2,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {\n      \"aws:PrincipalTag/team\": \"analytics\"\n    }\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\",\n          \"Condition\": {\n            \"StringEquals\": {\n              \"aws:PrincipalTag/team\": \"platform\"\n            }\n          }\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}"
+        }
+      ],
+      "prompt_sha256": "86eff0601c0b5f1062f133b1f993c4d5ca39aa2633acc56306afe9a972a9fc65"
+    },
+    {
+      "prompt_file": "prompts/prompt08_trial3.txt",
+      "task_id": "08_condition_mismatch",
+      "trial": 3,
+      "source_messages": [
+        {
+          "role": "system",
+          "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation)."
+        },
+        {
+          "role": "user",
+          "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {\n      \"aws:PrincipalTag/team\": \"analytics\"\n    }\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\",\n          \"Condition\": {\n            \"StringEquals\": {\n              \"aws:PrincipalTag/team\": \"platform\"\n            }\n          }\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}"
+        }
+      ],
+      "prompt_sha256": "86eff0601c0b5f1062f133b1f993c4d5ca39aa2633acc56306afe9a972a9fc65"
+    }
+  ]
+}

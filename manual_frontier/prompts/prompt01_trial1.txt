@@ -1,0 +1,26 @@
+Do not use tools or access files, websites, or other chats. Solve only from the text below.
+
+You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation).
+
+Evaluate this request.
+{
+  "request": {
+    "action": "s3:GetObject",
+    "resource": "arn:aws:s3:::project-data/report.csv",
+    "context": {}
+  },
+  "identity_policies": [
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Resource": "arn:aws:s3:::project-data/*",
+          "Action": "s3:GetObject"
+        }
+      ]
+    }
+  ],
+  "permissions_boundary": null,
+  "scp": null
+}

@@ -1,0 +1,1 @@
+{"decision":"ALLOW","reason":"The identity Allow matches, and the Deny using NotAction excludes s3:GetObject. No permissions boundary or SCP applies."}

@@ -1,0 +1,54 @@
+{
+  "task_id": "01_basic_allow",
+  "trial": 1,
+  "prompt_file": "prompt01_trial1.txt",
+  "thread_id": "01a18eb9-9f99-72d1-adc6-0b68c2b5e5d4",
+  "chat_title": "IAM-prompt01-trial1",
+  "model": "gpt-6.1-sol",
+  "reasoning_effort": "high",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Do not use tools or access files, websites, or other chats. Solve only from the text below.\n\nYou are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation).\n\nEvaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {}\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\"\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}\n\n"
+    }
+  ],
+  "raw_response": "{\"decision\":\"ALLOW\",\"reason\":\"The identity policy allows s3:GetObject on the matching resource, and no other restrictions apply.\"}",
+  "grade": {
+    "valid_format": true,
+    "correct": true,
+    "predicted": "ALLOW",
+    "expected": "ALLOW"
+  },
+  "error": null,
+  "started_utc": "2026-10-30T21:31:34+00:00",
+  "finished_utc": "2026-10-30T21:31:37+00:00",
+  "elapsed_seconds": 3.465,
+  "protocol_checks": {
+    "prompt_matches_ignoring_trailing_whitespace": true,
+    "tool_calls_observed": 0,
+    "single_completed_turn": true
+  },
+  "interface": "Codex desktop, manual user message",
+  "session_audit": {
+    "thread_id": "01a18eb9-9f99-72d1-adc6-0b68c2b5e5d4",
+    "chat_title": "IAM-prompt01-trial1",
+    "model": "gpt-6.1-sol",
+    "reasoning_effort": "high",
+    "cli_version": "0.165.0-alpha.1.2",
+    "source_log_filename": "rollout-2026-10-31T03-01-32-01a18eb9-9f99-72d1-adc6-0b68c2b5e5d4.jsonl",
+    "source_log_sha256": "e73697ba8d5c9854ec6d7713e8a5b6d0486532f1770a9c3ab45ccf39fd12b43a",
+    "tool_calls": [],
+    "turn_count": 1,
+    "benchmark_user_message_count": 1,
+    "additional_user_context_kinds": [
+      "environment_context",
+      "null_open_page_context"
+    ],
+    "started_at_utc_epoch": 1793395894,
+    "completed_at_utc_epoch": 1793395897,
+    "duration_ms": 3465,
+    "response_cross_checked_with_session_log": true,
+    "scope_note": "Selected metadata only. Raw session logs and hidden runtime instructions are not bundled; full latent reasoning is not available."
+  },
+  "source_export": "manual_frontier/chat_exports/collected_threads.json#IAM-prompt01-trial1"
+}

@@ -1,0 +1,1 @@
+{"decision":"ALLOW","reason":"The identity policy allows s3:GetObject on the matching resource, with no explicit Deny, permissions boundary, or SCP."}

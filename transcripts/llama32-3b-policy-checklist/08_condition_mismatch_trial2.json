@@ -1,0 +1,69 @@
+{
+  "task_id": "08_condition_mismatch",
+  "trial": 2,
+  "model": "llama3.2:3b",
+  "strategy": "policy-checklist",
+  "settings": {
+    "temperature": 0,
+    "seed": 43,
+    "num_predict": 256
+  },
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation).\nBefore selecting the final decision, audit all policy layers. In the reason, briefly state these four findings for this exact action and resource: (1) whether any explicit Deny statement actually matches, (2) whether any identity Allow actually matches, (3) whether the boundary is absent or contains a matching Allow, and (4) whether the SCP is absent or contains a matching Allow. Check Action or NotAction, Resource or NotResource, and conditions together for each statement; an unrelated Deny is not a matching Deny. An Allow in one layer does not override a matching Deny or supply an Allow missing from another required layer. ALLOW requires no matching Deny, a matching identity Allow, and a matching Allow in every supplied restrictive layer. Otherwise DENY. Write the reason key FIRST and the decision key LAST in the JSON object. Return only those two keys. Do not stop at finding an identity Allow."
+    },
+    {
+      "role": "user",
+      "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {\n      \"aws:PrincipalTag/team\": \"analytics\"\n    }\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\",\n          \"Condition\": {\n            \"StringEquals\": {\n              \"aws:PrincipalTag/team\": \"platform\"\n            }\n          }\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}"
+    }
+  ],
+  "request_payload": {
+    "model": "llama3.2:3b",
+    "stream": false,
+    "format": "json",
+    "options": {
+      "temperature": 0,
+      "seed": 43,
+      "num_predict": 256
+    },
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are auditing access authorization for a deliberately scoped AWS IAM scenario. Only identity-based policies, an optional permissions boundary, and an optional SCP apply. The principal is a same-account IAM user in an Organizations member account. The supplied SCP is the sole policy at the account level; ancestors allow all actions. No resource policies, cross-account access, sessions, RCPs, or other restrictions exist. Use default implicit deny; any applicable explicit Deny wins. Identity-based Allow is required, and if a permissions boundary or SCP is provided each must also Allow. Match Action case-insensitively, Resource case-sensitively, with only * and ? wildcards. StringEquals matches values literally and case-sensitively; context key names are case-insensitive. Context values are single strings. A missing condition key does not match. Return ONLY a JSON object with exactly two keys: decision (ALLOW or DENY) and reason (a short, nonempty explanation).\nBefore selecting the final decision, audit all policy layers. In the reason, briefly state these four findings for this exact action and resource: (1) whether any explicit Deny statement actually matches, (2) whether any identity Allow actually matches, (3) whether the boundary is absent or contains a matching Allow, and (4) whether the SCP is absent or contains a matching Allow. Check Action or NotAction, Resource or NotResource, and conditions together for each statement; an unrelated Deny is not a matching Deny. An Allow in one layer does not override a matching Deny or supply an Allow missing from another required layer. ALLOW requires no matching Deny, a matching identity Allow, and a matching Allow in every supplied restrictive layer. Otherwise DENY. Write the reason key FIRST and the decision key LAST in the JSON object. Return only those two keys. Do not stop at finding an identity Allow."
+      },
+      {
+        "role": "user",
+        "content": "Evaluate this request.\n{\n  \"request\": {\n    \"action\": \"s3:GetObject\",\n    \"resource\": \"arn:aws:s3:::project-data/report.csv\",\n    \"context\": {\n      \"aws:PrincipalTag/team\": \"analytics\"\n    }\n  },\n  \"identity_policies\": [\n    {\n      \"Version\": \"2012-10-17\",\n      \"Statement\": [\n        {\n          \"Effect\": \"Allow\",\n          \"Resource\": \"arn:aws:s3:::project-data/*\",\n          \"Action\": \"s3:GetObject\",\n          \"Condition\": {\n            \"StringEquals\": {\n              \"aws:PrincipalTag/team\": \"platform\"\n            }\n          }\n        }\n      ]\n    }\n  ],\n  \"permissions_boundary\": null,\n  \"scp\": null\n}"
+      }
+    ]
+  },
+  "raw_response": "{\n  \"decision\": \"DENY\",\n  \"reason\": \"Explicit Deny statement does not match, Identity Allow does not match, Permissions Boundary is absent, SCP is absent\"\n}",
+  "provider_response": {
+    "model": "llama3.2:3b",
+    "created_at": "2026-10-30T22:25:03.3285746Z",
+    "message": {
+      "role": "assistant",
+      "content": "{\n  \"decision\": \"DENY\",\n  \"reason\": \"Explicit Deny statement does not match, Identity Allow does not match, Permissions Boundary is absent, SCP is absent\"\n}"
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 9331737400,
+    "load_duration": 21362200,
+    "prompt_eval_count": 569,
+    "prompt_eval_cached_count": 568,
+    "prompt_eval_duration": 284666000,
+    "eval_count": 39,
+    "eval_duration": 8958509000
+  },
+  "grade": {
+    "valid_format": true,
+    "correct": true,
+    "predicted": "DENY",
+    "expected": "DENY"
+  },
+  "error": null,
+  "elapsed_seconds": 11.391,
+  "utc_time": "2026-10-30T22:25:03.331486+00:00",
+  "dataset_sha256": "ab3e03e4df6cbca20c29680ed8584f38cb6b4a041c3e286d2c991c023ed81e71"
+}

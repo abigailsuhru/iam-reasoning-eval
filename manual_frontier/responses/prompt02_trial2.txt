@@ -1,0 +1,1 @@
+{"decision":"DENY","reason":"An identity policy explicitly denies s3:GetObject on the requested resource, overriding the Allow."}

@@ -1,0 +1,122 @@
+{
+  "total_trials": 24,
+  "total_passes": 24,
+  "pass_rate": 1.0,
+  "pass_power_k": 1.0,
+  "pass_at_k": 1.0,
+  "infrastructure_errors": 0,
+  "format_failures": 0,
+  "decision_failures": 0,
+  "per_task": {
+    "01_basic_allow": {
+      "passes": 3,
+      "trials": 3,
+      "predictions": [
+        "ALLOW",
+        "ALLOW",
+        "ALLOW"
+      ],
+      "errors": 0
+    },
+    "02_explicit_deny": {
+      "passes": 3,
+      "trials": 3,
+      "predictions": [
+        "DENY",
+        "DENY",
+        "DENY"
+      ],
+      "errors": 0
+    },
+    "03_resource_mismatch": {
+      "passes": 3,
+      "trials": 3,
+      "predictions": [
+        "DENY",
+        "DENY",
+        "DENY"
+      ],
+      "errors": 0
+    },
+    "04_wildcard_action": {
+      "passes": 3,
+      "trials": 3,
+      "predictions": [
+        "ALLOW",
+        "ALLOW",
+        "ALLOW"
+      ],
+      "errors": 0
+    },
+    "05_notaction_exception": {
+      "passes": 3,
+      "trials": 3,
+      "predictions": [
+        "ALLOW",
+        "ALLOW",
+        "ALLOW"
+      ],
+      "errors": 0
+    },
+    "06_boundary_intersection": {
+      "passes": 3,
+      "trials": 3,
+      "predictions": [
+        "DENY",
+        "DENY",
+        "DENY"
+      ],
+      "errors": 0
+    },
+    "07_scp_restriction": {
+      "passes": 3,
+      "trials": 3,
+      "predictions": [
+        "DENY",
+        "DENY",
+        "DENY"
+      ],
+      "errors": 0
+    },
+    "08_condition_mismatch": {
+      "passes": 3,
+      "trials": 3,
+      "predictions": [
+        "DENY",
+        "DENY",
+        "DENY"
+      ],
+      "errors": 0
+    }
+  },
+  "run_id": "gpt61-sol-high-manual",
+  "model": "gpt-6.1-sol",
+  "reasoning_effort": "high",
+  "interface": "Codex desktop manual trials",
+  "tasks": 8,
+  "trials_per_task": 3,
+  "started_utc": "2026-10-30T21:31:34+00:00",
+  "finished_utc": "2026-10-30T22:02:54+00:00",
+  "runtime_seconds": 78.39,
+  "collection_window_seconds": 1880.0,
+  "runtime_note": "runtime_seconds sums app-recorded turn durations; collection window includes human time between trials.",
+  "api_cost_usd": null,
+  "cost_note": "Used the participant Codex account; attributable subscription or usage cost was not measured.",
+  "settings": {
+    "reasoning_effort": "high",
+    "temperature": null,
+    "seed": null,
+    "max_output_tokens": null
+  },
+  "codex_runtime_versions": [
+    "0.165.0-alpha.1.2"
+  ],
+  "dataset_sha256": "ab3e03e4df6cbca20c29680ed8584f38cb6b4a041c3e286d2c991c023ed81e71",
+  "limitations": [
+    "Manual Codex interface differs from Ollama system/user roles and decoding settings.",
+    "Codex adds runtime instructions and environment context; these are not a controlled API replication.",
+    "No tool calls or observed model switches in the selected session records.",
+    "Underlying model snapshot, latent reasoning, temperature, seed and account cost are not available.",
+    "100% on these tasks does not demonstrate a frontier-model limitation."
+  ]
+}
